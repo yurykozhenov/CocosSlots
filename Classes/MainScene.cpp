@@ -22,7 +22,10 @@ bool MainScene::init()
     winText = Label::createWithTTF("YOU WIN!", "fonts/Marker Felt.ttf", 60);
 	winText->enableShadow();
 	winText->setColor(Color3B(255, 215, 0));
-	winText->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+	winText->setPosition(Vec2(
+		visibleSize.width / 2 + origin.x,
+		visibleSize.height + origin.y - winText->getContentSize().height
+	));
 	winText->setVisible(false);
 	addChild(winText, 1000);
 
@@ -56,9 +59,9 @@ bool MainScene::init()
 
 	// Add 3 slot columns
 	auto distanceBetweenSlotCols = 200;
-	auto distanceBetweenSlots = 200;
+	distanceBetweenSlots = 200;
 
-	for (int i = 0; i < 3; i++) 
+	for (int i = 0; i < 3; i++)
 	{
 		auto xPosition = (i + 1) * distanceBetweenSlotCols - 41;
 		auto yPosition = 236;
@@ -77,7 +80,7 @@ bool MainScene::init()
 		slots[i][3] = Sprite::create("slot_seven.png");
 		slots[i][4] = Sprite::create("slot_tickets.png");
 
-		for (int j = 0; j < 5; j++) 
+		for (int j = 0; j < 5; j++)
 		{
 			slots[i][j]->setPosition(Vec2(xPosition, j * distanceBetweenSlots + yPosition));
 			slotMachine->addChild(slots[i][j], 1);
@@ -89,6 +92,7 @@ bool MainScene::init()
 	currentSlots[2] = 0;
 
 	attempts = 0;
+	slotAnimationSpeed = 0.5;
 
     return true;
 }
@@ -117,10 +121,11 @@ void MainScene::onKnobHover(EventMouse* event)
 	auto cursorX = event->getCursorX() - 45;
 	auto cursorY = event->getCursorY() - 130;
 
-	if (event->getCurrentTarget()->getBoundingBox().containsPoint(Vec2(cursorX, cursorY))) 
+	if (event->getCurrentTarget()->getBoundingBox().containsPoint(Vec2(cursorX, cursorY)))
 	{
 		knob->setTexture("KnobGlowHL.png");
-	} else 
+	}
+	else
 	{
 		knob->setTexture("knob1.png");
 	}
@@ -137,24 +142,24 @@ void MainScene::startSlotMachine()
 	{
 		for (int j = 0; j < 5; j++)
 		{
-			slots[i][j]->runAction(MoveBy::create(1, Vec2(0, currentSlots[i] * 200)));
+			slots[i][j]->runAction(MoveBy::create(1, Vec2(0, currentSlots[i] * distanceBetweenSlots)));
 		}
 	}
 
 	// Reset token
 	token->setVisible(true);
-	token->setOpacity(255); 
+	token->setOpacity(255);
 	token->setTexture("token.png");
 	token->setPosition(Vec2(1100, 0));
 
 	// Play token animation, then spin slots
 	token->runAction(Sequence::create(
 		DelayTime::create(1),
-		MoveTo::create(2, Vec2(780, 230)),
+		MoveTo::create(1.5, Vec2(780, 230)),
 		CallFunc::create([this]() { token->setTexture("insertToken.png"); }),
 		Spawn::create(
-			MoveBy::create(1, Vec2(-30, 0)),
-			FadeOut::create(1),
+			MoveBy::create(0.5, Vec2(-35, 0)),
+			FadeOut::create(0.5),
 			nullptr
 		),
 		CallFunc::create([this]() { spinSlots(); }),
@@ -171,7 +176,7 @@ void MainScene::spinSlots()
 		currentSlots[1] = randomNumber;
 		currentSlots[2] = randomNumber;
 	}
-	else 
+	else
 	{
 		currentSlots[0] = random(1, 4);
 		currentSlots[1] = random(1, 4);
@@ -180,12 +185,12 @@ void MainScene::spinSlots()
 
 	runAction(Sequence::create(
 		CallFunc::create([this] () { spinSingleSlot(0); }),
-		DelayTime::create(currentSlots[0]),
+		DelayTime::create(currentSlots[0] * slotAnimationSpeed),
 		CallFunc::create([this]() { spinSingleSlot(1); }),
-		DelayTime::create(currentSlots[1]),
+		DelayTime::create(currentSlots[1] * slotAnimationSpeed),
 		CallFunc::create([this]() { spinSingleSlot(2); }),
-		DelayTime::create(currentSlots[2]),
-		CallFunc::create([this]() 
+		DelayTime::create(currentSlots[2] * slotAnimationSpeed),
+		CallFunc::create([this]()
 		{
 			// Reset slot machine state
 			isKnobDown = false;
@@ -207,6 +212,8 @@ void MainScene::spinSingleSlot(int targetColumn)
 
 	for (int i = 0; i < 5; i++)
 	{
-		slots[targetColumn][i]->runAction(MoveBy::create(targetSlot, Vec2(0, targetSlot  * -200)));
+		slots[targetColumn][i]->runAction(
+		    MoveBy::create(slotAnimationSpeed * targetSlot, Vec2(0, targetSlot  * -distanceBetweenSlots))
+		);
 	}
 }
