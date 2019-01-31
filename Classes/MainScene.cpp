@@ -1,27 +1,3 @@
-/****************************************************************************
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
- 
- http://www.cocos2d-x.org
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- ****************************************************************************/
-
 #include "MainScene.h"
 #include "SimpleAudioEngine.h"
 
@@ -32,14 +8,7 @@ Scene* MainScene::createScene()
     return MainScene::create();
 }
 
-// Print useful error message instead of segfaulting when files are not there.
-static void problemLoading(const char* filename)
-{
-    printf("Error while loading: %s\n", filename);
-    printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
-}
-
-// on "init" you need to initialize your instance
+// TODO: Place slot sprites under slot machine
 bool MainScene::init()
 {
     if ( !Scene::init() )
@@ -50,19 +19,24 @@ bool MainScene::init()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	// TODO: Set text to YOU WIN!
-    winText = Label::createWithTTF("", "fonts/Marker Felt.ttf", 24);
-	winText->setPosition(Vec2(origin.x + visibleSize.width / 2,
-		origin.y + visibleSize.height - winText->getContentSize().height));
-	this->addChild(winText, 2);
+    winText = Label::createWithTTF("YOU WIN!", "fonts/Marker Felt.ttf", 60);
+	winText->enableShadow();
+	winText->setColor(Color3B(255, 215, 0));
+	winText->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+	winText->setVisible(false);
+	addChild(winText, 1000);
 
     auto slotMachine = Sprite::create("SlotMachine.png");
 	slotMachine->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-	this->addChild(slotMachine);
+	addChild(slotMachine);
 
 	auto arrow = Sprite::create("arrow.png");
 	arrow->setPosition(Vec2(60, slotMachine->getContentSize().height / 2));
-	slotMachine->addChild(arrow, 1);
+	slotMachine->addChild(arrow, 3);
+
+	token = Sprite::create("token.png");
+	token->setVisible(false);
+	slotMachine->addChild(token, 5);
 
 	knob = Sprite::create("knob1.png");
 	knob->setPosition(Vec2(slotMachine->getContentSize().width - 41, slotMachine->getContentSize().height - 148));
@@ -81,22 +55,48 @@ bool MainScene::init()
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, knob);
 
 	// Add 3 slot columns
-	auto xSlotPositionOffset = -41;
-	auto ySlotPositionOffset = 236;
 	auto distanceBetweenSlotCols = 200;
+	auto distanceBetweenSlots = 200;
 
-	for (int i = 1; i <= 3; i++) {
-		auto slot = Sprite::create("SlotBG.png");
-		slot->setPosition(Vec2(i * distanceBetweenSlotCols + xSlotPositionOffset, ySlotPositionOffset));
+	for (int i = 0; i < 3; i++) 
+	{
+		auto xPosition = (i + 1) * distanceBetweenSlotCols - 41;
+		auto yPosition = 236;
 
-		slotMachine->addChild(slot);
+		auto slotBackground = Sprite::create("SlotBG.png");
+		slotBackground->setPosition(Vec2(xPosition, yPosition));
+		slotMachine->addChild(slotBackground, 0);
+
+		auto slotFrame = Sprite::create("Frame.png");
+		slotFrame->setPosition(Vec2(xPosition, yPosition));
+		slotMachine->addChild(slotFrame, 2);
+
+		slots[i][0] = Sprite::create("slot_gold.png");
+		slots[i][1] = Sprite::create("slot_feather.png");
+		slots[i][2] = Sprite::create("pw_slot.png");
+		slots[i][3] = Sprite::create("slot_seven.png");
+		slots[i][4] = Sprite::create("slot_tickets.png");
+
+		for (int j = 0; j < 5; j++) 
+		{
+			slots[i][j]->setPosition(Vec2(xPosition, j * distanceBetweenSlots + yPosition));
+			slotMachine->addChild(slots[i][j], 1);
+		}
 	}
+
+	currentSlots[0] = 0;
+	currentSlots[1] = 0;
+	currentSlots[2] = 0;
+
+	attempts = 0;
 
     return true;
 }
 
 void MainScene::onKnobPress(EventMouse* event)
 {
+	if (isKnobDown) return;
+
 	isKnobPressed = true;
 	knob->setVisible(false);
 	knobDown->setVisible(true);
@@ -107,8 +107,9 @@ void MainScene::onKnobRelease(EventMouse* event)
 	if (!isKnobPressed) return;
 
 	isKnobPressed = false;
+	isKnobDown = true;
 
-	// TODO: Insert coin, start rolling
+	startSlotMachine();
 }
 
 void MainScene::onKnobHover(EventMouse* event)
@@ -116,10 +117,96 @@ void MainScene::onKnobHover(EventMouse* event)
 	auto cursorX = event->getCursorX() - 45;
 	auto cursorY = event->getCursorY() - 130;
 
-	if (event->getCurrentTarget()->getBoundingBox().containsPoint(Vec2(cursorX, cursorY))) {
+	if (event->getCurrentTarget()->getBoundingBox().containsPoint(Vec2(cursorX, cursorY))) 
+	{
 		knob->setTexture("KnobGlowHL.png");
-	}
-	else {
+	} else 
+	{
 		knob->setTexture("knob1.png");
+	}
+}
+
+void MainScene::startSlotMachine()
+{
+	attempts++;
+
+	winText->setVisible(false);
+
+	// Reset slots
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			slots[i][j]->runAction(MoveBy::create(1, Vec2(0, currentSlots[i] * 200)));
+		}
+	}
+
+	// Reset token
+	token->setVisible(true);
+	token->setOpacity(255); 
+	token->setTexture("token.png");
+	token->setPosition(Vec2(1100, 0));
+
+	// Play token animation, then spin slots
+	token->runAction(Sequence::create(
+		DelayTime::create(1),
+		MoveTo::create(2, Vec2(780, 230)),
+		CallFunc::create([this]() { token->setTexture("insertToken.png"); }),
+		Spawn::create(
+			MoveBy::create(1, Vec2(-30, 0)),
+			FadeOut::create(1),
+			nullptr
+		),
+		CallFunc::create([this]() { spinSlots(); }),
+		nullptr
+	));
+}
+
+void MainScene::spinSlots()
+{
+	// For demonstration purposes, make player win on third attempt
+	if (attempts == 3) {
+		int randomNumber = random(1, 4);
+		currentSlots[0] = randomNumber;
+		currentSlots[1] = randomNumber;
+		currentSlots[2] = randomNumber;
+	}
+	else 
+	{
+		currentSlots[0] = random(1, 4);
+		currentSlots[1] = random(1, 4);
+		currentSlots[2] = random(1, 4);
+	}
+
+	runAction(Sequence::create(
+		CallFunc::create([this] () { spinSingleSlot(0); }),
+		DelayTime::create(currentSlots[0]),
+		CallFunc::create([this]() { spinSingleSlot(1); }),
+		DelayTime::create(currentSlots[1]),
+		CallFunc::create([this]() { spinSingleSlot(2); }),
+		DelayTime::create(currentSlots[2]),
+		CallFunc::create([this]() 
+		{
+			// Reset slot machine state
+			isKnobDown = false;
+			knob->setVisible(true);
+			knobDown->setVisible(false);
+
+			// Check win condition
+			if (!(currentSlots[0] == currentSlots[1] && currentSlots[1] == currentSlots[2])) return;
+
+			winText->setVisible(true);
+		}),
+		nullptr
+	));
+}
+
+void MainScene::spinSingleSlot(int targetColumn)
+{
+	int targetSlot = currentSlots[targetColumn];
+
+	for (int i = 0; i < 5; i++)
+	{
+		slots[targetColumn][i]->runAction(MoveBy::create(targetSlot, Vec2(0, targetSlot  * -200)));
 	}
 }
