@@ -27,18 +27,25 @@
 
 #include "cocos2d.h"
 
-class HelloWorld : public cocos2d::Scene
+class MainScene : public cocos2d::Scene
 {
 public:
     static cocos2d::Scene* createScene();
 
     virtual bool init();
-    
-    // a selector callback
-    void menuCloseCallback(cocos2d::Ref* pSender);
-    
+
+	virtual void onKnobPress(cocos2d::EventMouse*);
+	virtual void onKnobRelease(cocos2d::EventMouse*);
+	virtual void onKnobHover(cocos2d::EventMouse*);
+
     // implement the "static create()" method manually
-    CREATE_FUNC(HelloWorld);
+    CREATE_FUNC(MainScene);
+
+private:
+	bool isKnobPressed; 
+	cocos2d::Sprite* knob;
+	cocos2d::Sprite* knobDown;
+	cocos2d::Label* winText;
 };
 
 #endif // __HELLOWORLD_SCENE_H__
