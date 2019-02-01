@@ -8,16 +8,12 @@ Scene* MainScene::createScene()
     return MainScene::create();
 }
 
-// TODO: Place slot sprites under slot machine
 bool MainScene::init()
 {
-    if (!Scene::init())
-    {
-        return false;
-    }
+    if (!Scene::init()) return false;
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    auto origin = Director::getInstance()->getVisibleOrigin();
 
     winText = Label::createWithTTF("YOU WIN!", "fonts/Marker Felt.ttf", 60);
     winText->enableShadow();
@@ -32,23 +28,24 @@ bool MainScene::init()
     auto slotMachine = Sprite::create("SlotMachine.png");
     slotMachine->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
     addChild(slotMachine);
+    auto slotMachineSize = slotMachine->getContentSize();
 
     auto arrow = Sprite::create("arrow.png");
-    arrow->setPosition(Vec2(60, slotMachine->getContentSize().height / 2));
+    arrow->setPosition(Vec2(60, slotMachineSize.height / 2));
     slotMachine->addChild(arrow, 3);
 
     token = Sprite::create("token.png");
     token->setVisible(false);
-    slotMachine->addChild(token, 5);
+    slotMachine->addChild(token, 4);
 
     knob = Sprite::create("knob1.png");
-    knob->setPosition(Vec2(slotMachine->getContentSize().width - 41, slotMachine->getContentSize().height - 148));
-    slotMachine->addChild(knob);
+    knob->setPosition(Vec2(slotMachineSize.width - 41, slotMachineSize.height - 148));
+    slotMachine->addChild(knob, 3);
 
     knobDown = Sprite::create("KnobDown.png");
-    knobDown->setPosition(Vec2(slotMachine->getContentSize().width - 41, slotMachine->getContentSize().height - 232));
+    knobDown->setPosition(Vec2(slotMachineSize.width - 41, slotMachineSize.height - 232));
     knobDown->setVisible(false);
-    slotMachine->addChild(knobDown);
+    slotMachine->addChild(knobDown, 3);
 
     // Attach mouse listener to knob
     auto listener = EventListenerMouse::create();
@@ -63,8 +60,8 @@ bool MainScene::init()
 
     for (int i = 0; i < 3; i++)
     {
-        auto xPosition = (i + 1) * distanceBetweenSlotCols - 41;
-        auto yPosition = 236;
+        float xPosition = (i + 1) * distanceBetweenSlotCols - 41.0f;
+        float yPosition = 236.0f;
 
         auto slotBackground = Sprite::create("SlotBG.png");
         slotBackground->setPosition(Vec2(xPosition, yPosition));
@@ -193,7 +190,7 @@ void MainScene::spinSlots()
         DelayTime::create(currentSlots[2] * slotAnimationSpeed),
         CallFunc::create([this]()
         {
-            // Reset slot machine state
+            // Reset knob state
             isKnobDown = false;
             knob->setVisible(true);
             knobDown->setVisible(false);

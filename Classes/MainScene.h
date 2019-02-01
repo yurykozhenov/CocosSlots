@@ -21,7 +21,7 @@ private:
     bool isKnobDown;
     int currentSlots[3];
     int attempts;
-    int distanceBetweenSlots;
+    float distanceBetweenSlots;
     float slotAnimationSpeed;
     cocos2d::Sprite* knob;
     cocos2d::Sprite* knobDown;
