@@ -67,9 +67,13 @@ bool MainScene::init()
         slotBackground->setPosition(Vec2(xPosition, yPosition));
         slotMachine->addChild(slotBackground, 0);
 
+        auto clipper = ClippingNode::create(slotBackground);
+        clipper->setAlphaThreshold(0);
+        slotMachine->addChild(clipper, 0);
+
         auto slotFrame = Sprite::create("Frame.png");
         slotFrame->setPosition(Vec2(xPosition, yPosition));
-        slotMachine->addChild(slotFrame, 2);
+        clipper->addChild(slotFrame, 2);
 
         slots[i][0] = Sprite::create("slot_gold.png");
         slots[i][1] = Sprite::create("slot_feather.png");
@@ -80,7 +84,7 @@ bool MainScene::init()
         for (int j = 0; j < 5; j++)
         {
             slots[i][j]->setPosition(Vec2(xPosition, j * distanceBetweenSlots + yPosition));
-            slotMachine->addChild(slots[i][j], 1);
+            clipper->addChild(slots[i][j], 1);
         }
     }
 
