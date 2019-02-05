@@ -51,6 +51,7 @@ $RECYCLE.BIN/
 *CMakeFiles/
 *cmake_install.cmake
 *Makefile
+cmake-build-debug/
 
 # cocos studio
 *.udf

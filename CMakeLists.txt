@@ -112,7 +112,7 @@ endif()
 set(all_code_files
     ${GAME_HEADER}
     ${GAME_SOURCE}
-    )
+        Classes/SlotMachine.cpp Classes/SlotMachine.h Classes/Knob.cpp Classes/Knob.h Classes/Token.cpp Classes/Token.h Classes/Slots.cpp Classes/Slots.h Classes/WinText.cpp Classes/WinText.h)
 if(NOT ANDROID)
     add_executable(${APP_NAME} ${all_code_files})
 else()
