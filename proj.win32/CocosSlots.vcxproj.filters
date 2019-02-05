@@ -27,13 +27,13 @@
     <ClCompile Include="..\Classes\SlotMachine.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Slots.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Token.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\WinText.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SlotColumn.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,13 +53,13 @@
     <ClInclude Include="..\Classes\SlotMachine.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Slots.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Token.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\WinText.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\SlotColumn.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

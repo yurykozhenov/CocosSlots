@@ -152,8 +152,8 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\Knob.cpp" />
     <ClCompile Include="..\Classes\MainScene.cpp" />
+    <ClCompile Include="..\Classes\SlotColumn.cpp" />
     <ClCompile Include="..\Classes\SlotMachine.cpp" />
-    <ClCompile Include="..\Classes\Slots.cpp" />
     <ClCompile Include="..\Classes\Token.cpp" />
     <ClCompile Include="..\Classes\WinText.cpp" />
     <ClCompile Include="main.cpp" />
@@ -162,8 +162,8 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\Knob.h" />
     <ClInclude Include="..\Classes\MainScene.h" />
+    <ClInclude Include="..\Classes\SlotColumn.h" />
     <ClInclude Include="..\Classes\SlotMachine.h" />
-    <ClInclude Include="..\Classes\Slots.h" />
     <ClInclude Include="..\Classes\Token.h" />
     <ClInclude Include="..\Classes\WinText.h" />
     <ClInclude Include="main.h" />

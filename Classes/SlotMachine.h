@@ -4,8 +4,8 @@
 #include "cocos2d.h"
 #include "WinText.h"
 #include "Token.h"
-#include "Slots.h"
 #include "Knob.h"
+#include "SlotColumn.h"
 
 class SlotMachine
 {
@@ -18,11 +18,16 @@ public:
 
 private:
     int attempts;
+    int slotColumnsSize;
+    int currentSlots[3];
+    float slotAnimationSpeed;
     WinText* winText;
     Token* token;
-    Slots* slots;
+    SlotColumn* slotColumns[3];
     Knob* knob;
 
+    virtual void spinSlots();
+    virtual void resetSlots();
     virtual void onSpinEnd();
 };
 
